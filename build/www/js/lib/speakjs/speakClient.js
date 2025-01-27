@@ -49,9 +49,7 @@
 			this.stopOld();
 			if (this.endTimeout) clearTimeout(this.endTimeout);
 		};
-		if (!args.playbackRate) {
-			args.playbackRate = 1.0;
-		}
+
 		var PROFILE = 1;
 		
 		function startSource(source) {
@@ -81,11 +79,10 @@
 					// convert to msecs
 					// use a default of 1 sec, if we lack a valid duration
 					var delay = (duration) ? Math.ceil(duration * 1000) : 1000;
-					source.endTimeout = setTimeout(onended, delay / args.playbackRate);
+					source.endTimeout = setTimeout(onended, delay);
 				}
 				// finally assign the buffer
 				source.buffer = audioData;
-				source.playbackRate.value = args.playbackRate;
 				// start playback for Chrome >= 32
 				// please note that this would be without effect on iOS, since we're
 				// inside an async callback and iOS requires direct user interaction
