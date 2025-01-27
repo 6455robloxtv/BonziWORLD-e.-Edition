@@ -1,156 +1,130 @@
 function Espeak(worker_path, ready_cb) {
-  this.worker = new Worker(worker_path);
-  this.ready = false;
-  this.worker.onmessage = function(e) {
-    if (e.data !== 'ready') return;
-    this.worker.onmessage = null;
-    this.worker.addEventListener('message', this);
-    this.ready = true;
-    if (ready_cb) {
-      ready_cb();
-    }
-  }.bind(this);
-}
+(function (window, undefined) {
+	// Use the correct document accordingly with window argument
+	var document = window.document;
+	
+	// Define a local copy of speak
+	var speak = {};
+	
+	// Map over speak in case of overwrite
+	var _speak = window.speak;
+	
+	// Runs speak.js in no conflict mode, returning the original 'speak'
+	// variable to its owner. Returns a reference to this speak object.
+	speak.noConflict = function () {
+		window.speak = _speak;
+		return speak;
+	}
+	
+	/* Cross-Browser Web Audio API Playback With Chrome And Callbacks */
+	// from http://www.masswerk.at/mespeak/
+	
+	// alias the Web Audio API AudioContext-object
+	var aliasedAudioContext = window.AudioContext || window.webkitAudioContext;
+	// ugly user-agent-string sniffing
+	var isChrome = ((typeof navigator !== 'undefined') && navigator.userAgent &&
+	navigator.userAgent.indexOf('Chrome') !== -1);
+	var chromeVersion = (isChrome) ?
+	parseInt(
+		navigator.userAgent.replace(/^.*?\bChrome\/([0-9]+).*$/, '$1'),
+		10
+	) : 0;
+	
+	// set up a BufferSource-node
+	var audioContext = new aliasedAudioContext();
+	
+	// Web Worker
+	var speakWorker;
+	try {
+		// https://github.com/yoshi6jp/speak.js/commit/b85d385024f1e20818aa9e3b272c86aa9fc2ebe6
+		speakWorker = new Worker(document.querySelector('script[src$="speakClient.js"]').getAttribute('src').replace(/speakClient.js$/, 'speakWorker.js'));
+	} catch (e) {
+		console.log('speak.js warning: no worker support');
+	}
+	
+	speak.play = function (text, args, onended, onstart) {
+		var source = audioContext.createBufferSource();
 
-Espeak.prototype.handleEvent = function (evt) {
-  var callback = evt.data.callback;
-  if (callback && this[callback]) {
-    this[callback].apply(this, evt.data.result);
-    if (evt.data.done)
-      delete this[callback];
-    return;
-  }
-};
+		source.stopOld = source.stop;
+		source.stop = function() {
+			this.stopOld();
+			if (this.endTimeout) clearTimeout(this.endTimeout);
+		};
 
-function _createAsyncMethod(method) {
-  return function() {
-    var lastArg = arguments[arguments.length - 1];
-    var message = { method: method, args: Array.prototype.slice.call(arguments, 0) };
-    if (typeof lastArg == 'function') {
-      var callback = '_' + method + '_' + Math.random().toString().substring(2) +'_cb';
-      this[callback] = lastArg;
-      message.args.pop();
-      message.callback = callback;
-    }
-    this.worker.postMessage(message);
-  };
-}
-
-for (var i = 0; i < 8; i++) {
-  var method = [
-    'listVoices',
-    'get_rate',
-    'get_pitch',
-    'set_rate',
-    'set_pitch',
-    'setVoice',
-    'synth'
-  ][i];
-  Espeak.prototype[method] = _createAsyncMethod(method);
-}
-
-/* An audio node that can have audio chunks pushed to it */
-
-function PushAudioNode(context, start_callback, end_callback, stop_callback) {
-  this.start_callback = start_callback;
-  this.end_callback = end_callback;
-  this.stop_callback = stop_callback;
-  this.run_stop_callback = true;
-  this.samples_queue = [];
-  this.context = context;
-  this.scriptNode = context.createScriptProcessor(
-    isDesktop || false ? 0 : 8192, 1, 1
-  );
-  this.connected = false;
-  this.sinks = [];
-  this.startTime = 0;
-  this.closed = false;
-  this.initialized = false;
-}
-
-PushAudioNode.prototype.push = function(chunk) {
-  if (this.closed)
-    throw "can't push more chunks after node was closed";
-  this.samples_queue.push(chunk);
-  if (!this.connected) {
-    if (!this.sinks.length)
-      throw "No destination set for PushAudioNode";
-    this._do_connect();
-  }
-};
-
-PushAudioNode.prototype.close = function() {
-  this.closed = true;
-};
-
-PushAudioNode.prototype.connect = function(dest) {
-  this.sinks.push(dest);
-  if (this.samples_queue.length) {
-    this._do_connect();
-  }
-};
-
-PushAudioNode.prototype._do_connect = function() {
-  if (this.connected) return;
-  this.connected = true;
-  for (var dest in this.sinks) { // ???????
-    this.scriptNode.connect(this.sinks[dest]);
-  }
-  this.scriptNode.onaudioprocess = this.handleEvent.bind(this);
-};
-
-PushAudioNode.prototype.disconnect = function() {
-  this.scriptNode.onaudioprocess = null;
-  this.scriptNode.disconnect();
-  if (this.run_stop_callback)
-    this.stop_callback();
-  this.connected = false;
-};
-
-PushAudioNode.prototype.handleEvent = function(evt) {
-  var bufferSize = evt.target.bufferSize;
-
-  if (!this.startTime) {
-    this.startTime = evt.playbackTime;
-    if (this.start_callback) {
-      this.start_callback();
-    }
-    this.close_finished = false;
-    this.initialized = true;
-  }
-
-  var offset = 0;
-
-  while (this.samples_queue.length && offset < bufferSize) {
-    var chunk = this.samples_queue[0];
-    var to_copy = chunk.subarray(0, bufferSize - offset);
-    if (evt.outputBuffer.copyToChannel) {
-      evt.outputBuffer.copyToChannel(to_copy, 0, offset);
-    } else {
-      evt.outputBuffer.getChannelData(0).set(to_copy, offset);
-    }
-    offset += to_copy.length;
-    chunk = chunk.subarray(to_copy.length);
-    if (chunk.length)
-      this.samples_queue[0] = chunk;
-    else
-      this.samples_queue.shift();
-  }
-
-
-  if (!this.samples_queue.length && this.closed) {
-    var end_delay = Math.max(0, (((bufferSize - 2048) / 2048) * 0.120) * 1000);
-    setTimeout((function() {
-      if (!this.close_finished) {
-        if (this.end_callback) {
-          this.end_callback(evt.playbackTime - this.startTime);
-        }
-        this.run_stop_callback = false;
-      }
-      this.disconnect();
-      this.close_finished = true;
-     }).bind(this), 
-     end_delay
-    );
-  }
-};
+		var PROFILE = 1;
+		
+		function startSource(source) {
+			if (source.start) {
+				source.start(0);
+			} else {
+				source.noteOn(0);
+			}
+			if (onstart) onstart(source);
+		}
+		
+		function playSound(streamBuffer) {
+			source.connect(audioContext.destination);
+			// since the ended-event isn't generally implemented,
+			// we need to use the decodeAudioData()-method in order
+			// to extract the duration to be used as a timeout-delay
+			audioContext.decodeAudioData(streamBuffer, function (audioData) {
+				// detect any implementation of the ended-event
+				// Chrome added support for the ended-event lately,
+				// but it's unreliable (doesn't fire every time)
+				// so let's exclude it.
+				if (!isChrome && source.onended !== undefined) {
+					// we could also use "source.addEventListener('ended', callback, false)" here
+					source.onended = onended;
+				} else {
+					var duration = audioData.duration;
+					// convert to msecs
+					// use a default of 1 sec, if we lack a valid duration
+					var delay = (duration) ? Math.ceil(duration * 1000) : 1000;
+					source.endTimeout = setTimeout(onended, delay);
+				}
+				// finally assign the buffer
+				source.buffer = audioData;
+				// start playback for Chrome >= 32
+				// please note that this would be without effect on iOS, since we're
+				// inside an async callback and iOS requires direct user interaction
+				if (chromeVersion >= 32) startSource(source)
+			},
+			function(error) { /* decoding-error-callback */ }
+		);
+			// normal start of playback, this would be essentially autoplay
+			// but is without any effect in Chrome 32
+			// let's exclude Chrome 32 and higher to avoid any double calls anyway
+			if (!isChrome || chromeVersion < 32) {
+				startSource(source);
+			}
+		}
+		
+		function handleWav(wav) {
+			var startTime = Date.now();
+			var buffer = new ArrayBuffer(wav.length);
+			new Uint8Array(buffer).set(wav);
+			// TODO: try playAudioDataAPI(data), and fallback if failed
+			playSound(buffer);
+			if (PROFILE) console.log('speak.js: wav processing took ' + (Date.now() - startTime).toFixed(2) + ' ms');
+		}
+		
+		if (args && args.noWorker) {
+			// Do everything right now. speakGenerator.js must have been loaded.
+			var startTime = Date.now();
+			var wav = generateSpeech(text, args);
+			if (PROFILE) console.log('speak.js: processing took ' + (Date.now() - startTime).toFixed(2) + ' ms');
+			playSound(wav);
+		} else {
+			// Call the worker, which will return a wav that we then play
+			var startTime = Date.now();
+			speakWorker.onmessage = function (event) {
+				if (PROFILE) console.log('speak.js: worker processing took ' + (Date.now() - startTime).toFixed(2) + ' ms');
+				handleWav(event.data);
+			};
+			speakWorker.postMessage({ text: text, args: args });
+		}
+	};
+	
+	// Expose speak to the global object
+	window.speak = speak;
+})(window);
