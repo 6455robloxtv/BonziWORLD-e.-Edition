@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Peedy</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: black; font-family: 'Comic Sans MS', sans-serif; }
+        canvas { display: block; }
+        #message, #timer, #loadingScreen { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; text-align: center; font-size: 48px; }
+        #timer { top: 10%; font-size: 32px; transform: translateX(-50%); }
+    </style>
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="loadingScreen">Loading...</div>
+    <div id="message" style="display:none;">You found Peedy!</div>
+    <div id="timer">30</div>
+    <audio id="bgm" src="https://files.catbox.moe/fp8rdm.wav" loop></audio>
+    <audio id="explodeSound" src="https://www.myinstants.com/media/sounds/bfdi-explosion.mp3"></audio>
+    <script>
+        const canvas = document.getElementById('gameCanvas'), ctx = canvas.getContext('2d');
+        const timerEl = document.getElementById('timer'), msg = document.getElementById('message'), bgm = document.getElementById('bgm');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+
+        const objs = [], w = 106, h = 86, count = 1005, peedyImg = new Image(), explodeGif = new Image();
+        let time = 30, peedy, loaded = 0;
+        peedyImg.src = "https://files.catbox.moe/8gysq0.png";
+        explodeGif.src = "https://files.catbox.moe/jqgdgb.gif";
+
+        function loadSprites() {
+            const imgs = [
+                "https://files.catbox.moe/57q5wa.png", 
+                "https://files.catbox.moe/3rdc9y.png", 
+                "https://files.catbox.moe/1pyy3j.png", 
+                "https://files.catbox.moe/ek4gqy.png"
+            ].map(src => { const img = new Image(); img.src = src; return img; });
+
+            for (let i = 0; i < count; i++) {
+                objs.push({
+                    x: Math.random() * (canvas.width - w),
+                    y: Math.random() * (canvas.height - h),
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    img: imgs[Math.floor(Math.random() * imgs.length)],
+                    explode: false,
+                    opacity: 1 // Add opacity for fading out
+                });
+            }
+            peedy = { x: Math.random() * (canvas.width - w), y: Math.random() * (canvas.height - h), img: peedyImg };
+        }
+
+        function drawObj(o) {
+            ctx.globalAlpha = o.opacity; // Apply opacity
+            ctx.drawImage(o.explode ? explodeGif : o.img, o.x, o.y, w, h);
+            ctx.globalAlpha = 1; // Reset opacity
+        }
+
+        function updateObjs() {
+            for (let o of objs) {
+                if (!o.explode) {
+                    o.x += o.vx; o.y += o.vy;
+                    if (o.x < 0 || o.x > canvas.width - w) o.vx *= -1;
+                    if (o.y < 0 || o.y > canvas.height - h) o.vy *= -1;
+                } else {
+                    // Reduce opacity for fade-out
+                    o.opacity -= 0.05;
+                    if (o.opacity <= 0) o.opacity = 0; // Fully invisible
+                }
+                drawObj(o);
+            }
+        }
+
+        function explodeSprites() {
+            let index = 0;
+            const explodeSound = document.getElementById('explodeSound');
+            const interval = setInterval(() => {
+                if (index >= objs.length) {
+                    clearInterval(interval);
+                    return;
+                }
+                const o = objs[index];
+                if (o !== peedy && !o.explode) {
+                    o.explode = true;
+                    explodeSound.cloneNode(true).play(); // Play sound immediately with no cooldown
+                }
+                index++;
+            }, 10); // 0.01 second interval (100 times per second)
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawObj(peedy); updateObjs();
+            requestAnimationFrame(gameLoop);
+        }
+
+        canvas.onclick = e => {
+            const { clientX: x, clientY: y } = e, px = peedy.x, py = peedy.y;
+            if (x > px && x < px + w && y > py && y < py + h) {
+                msg.style.display = "block"; bgm.pause();
+                setTimeout(() => location.reload(), 3000);
+            }
+        };
+
+        (function startGame() {
+            loadSprites(); bgm.play();
+            document.getElementById('loadingScreen').style.display = 'none';
+            const timer = setInterval(() => {
+                timerEl.textContent = --time;
+                if (time <= 0) {
+                    clearInterval(timer);
+                    bgm.pause();
+                    explodeSprites();
+                }
+            }, 1000);
+            gameLoop();
+        })();
+    </script>
+</body>
+</html>
