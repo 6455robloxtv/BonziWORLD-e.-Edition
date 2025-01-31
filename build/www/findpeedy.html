@@ -103,7 +103,7 @@
         };
 
         (function startGame() {
-            loadSprites(); bgm.play();
+            loadSprites(); bgm.play(); // Play the background music immediately
             document.getElementById('loadingScreen').style.display = 'none';
             const timer = setInterval(() => {
                 timerEl.textContent = --time;
@@ -118,3 +118,4 @@
     </script>
 </body>
 </html>
+
