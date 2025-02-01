@@ -3,7 +3,7 @@
 		"public": {
 			"char_limit": 8600000,
 			"name_limit": 500,
-			"godword": "Efrombonziworldisthebest2012abcdefghijklmnopqrstuvwxyz",
+			"godword": "Efrombonziworld2012",
 			"runlevel": {
 				"godmode": 0,
 				"youtube": 0,
@@ -31,9 +31,9 @@
 				"peedy": 0, 
 				"sanitize": 3,
 				"losky": 0,
-				"video": 3,
+				"video": 0,
 				"clippy": 3,
-				"img": 3,
+				"img": 0,
 				"loskyize": 3,
 				"unbojih": 3,
 				"seamus": 3,
@@ -55,7 +55,7 @@
 				"fune": 3,
 				"ww3": 3,
 				"broadcast": 3,
-				"crosscolor": 3,
+				"crosscolor": 0,
 				"move": 0
 			},
 			"room_max": 1000000,
