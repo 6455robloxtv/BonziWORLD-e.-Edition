@@ -229,15 +229,15 @@ let youtube_music_url = "";
 
 // the clusterfuck of video ids
 var videoIdsCommercials = [
-  "https://www.youtube.com/watch?v=kZXk-Gs-uAo",
-  "https://www.youtube.com/watch?v=aieqWjgvUbw",
-  "https://www.youtube.com/watch?v=MqeKwKSq07g",
-  "https://www.youtube.com/watch?v=1ek5EN1s08A"
-  "https://www.youtube.com/watch?v=zi3xXEljKP4",
-  "https://www.youtube.com/watch?v=gIyacqEIDjI",
-  "https://www.youtube.com/watch?v=yat5YCM9N_s",
+  "https://www.youtube.com/watch?v=b2OUKjLzcEc",
+  "https://www.youtube.com/watch?v=Uyw-bne3G2A",
+  "https://www.youtube.com/watch?v=gcGI1f24eyM",
+  "https://www.youtube.com/watch?v=K0damuN_9bQ",
+  "https://www.youtube.com/watch?v=5ls7g9eH7ss",
+  "https://www.youtube.com/watch?v=hb59QZW2SCA",
+  "https://www.youtube.com/watch?v=VJs_VALzi_8",
   "https://www.youtube.com/watch?v=GCA5CB5uUyA",
-  "https://www.youtube.com/watch?v=PVi2SGNsEwk",
+  "https://www.youtube.com/watch?v=h6cp-6Zthm4",
   "https://www.youtube.com/watch?v=DuD_boVOl54",
   "https://www.youtube.com/watch?v=Jz6FCFoL3k4",
   "https://www.youtube.com/watch?v=9943uVZ-eL4",
@@ -245,16 +245,15 @@ var videoIdsCommercials = [
   "https://www.youtube.com/watch?v=DSYiXCEWsVc",
   "https://www.youtube.com/watch?v=AykkOSaLphY",
   "https://www.youtube.com/watch?v=liqetY2e7a8"
-  "https://www.youtube.com/watch?v=_TOKdk36iVM"
 ]
 var videoIds4PM2430PM = [
-  "https://www.youtube.com/watch?v=kZXk-Gs-uAo",
-  "https://www.youtube.com/watch?v=aieqWjgvUbw",
-  "https://www.youtube.com/watch?v=MqeKwKSq07g",
-  "https://www.youtube.com/watch?v=1ek5EN1s08A",
+  "https://www.youtube.com/watch?v=n_sWTHQKr-s",
+  "https://www.youtube.com/watch?v=FdjXC4aDNrc",
+  "https://www.youtube.com/watch?v=oqwjsqLvaGA",
+  "https://www.youtube.com/watch?v=ewQeG4bfh7o",
   "https://www.youtube.com/watch?v=J1xFJDSeHxI",
-  "https://www.youtube.com/watch?v=zi3xXEljKP4",
-  "https://www.youtube.com/watch?v=gIyacqEIDjI",
+  "https://www.youtube.com/watch?v=AJNF04k6hDU",
+  "https://www.youtube.com/watch?v=EXFJ1gUqSOI",
   "https://www.youtube.com/watch?v=zvB3h2IKdYU",
   "https://www.youtube.com/watch?v=ihDMzzMxsFY",
   "https://www.youtube.com/watch?v=JdPibO28X6g",
@@ -1599,7 +1598,7 @@ let userCommands = {
   },
 
 
-  bonzitv1: function(vidRaw) {
+  setbonzitvvid: function(vidRaw) {
     if (this.room.rid != "bonzi_tv") return;
 
 
@@ -1715,7 +1714,7 @@ let userCommands = {
     }
   },
 
-  shores: function(vidRaw) {
+  setbonzitvvid2: function(vidRaw) {
     if (this.room.rid != "bonzi_tv") return;
 
 
