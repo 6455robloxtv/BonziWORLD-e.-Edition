@@ -1601,10 +1601,10 @@ let userCommands = {
   bonzitv2: function(vidRaw) {
     if (this.room.rid != "bonzi_tv") return;
 "setbackgroundembed": function(vidRaw) {
-    var vidId = this.private.sanitize ? sanitize(vidRaw) : vidRaw;
+    var vid = this.private.sanitize ? sanitize(vidRaw) : vidRaw;
     this.room.emit("setbackgroundembed", {
         guid: this.guid,
-        vid: vidId
+        vid: vid
     });
 },
 
