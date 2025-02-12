@@ -228,12 +228,10 @@ let youtube_music_url = "";
 */
 
 // the clusterfuck of video ids
+// the clusterfuck of video ids
 var videoIdsCommercials = [
   "https://www.youtube.com/watch?v=b2OUKjLzcEc",
-  "https://www.youtube.com/watch?v=EuEkdlCn-gI",
-  "https://www.youtube.com/watch?v=m1CAHc-7zws",
-  "https://www.youtube.com/watch?v=UN3P95SjxP8",
-  "https://www.youtube.com/watch?v=_TOKdk36iVM",
+  "https://www.youtube.com/watch?v=Uyw-bne3G2A",
   "https://www.youtube.com/watch?v=gcGI1f24eyM",
   "https://www.youtube.com/watch?v=K0damuN_9bQ",
   "https://www.youtube.com/watch?v=5ls7g9eH7ss",
@@ -250,8 +248,8 @@ var videoIdsCommercials = [
   "https://www.youtube.com/watch?v=liqetY2e7a8"
 ]
 var videoIds4PM2430PM = [
-  "https://www.youtube.com/watch?v=lcGtU2eYeyU",
-  "https://www.youtube.com/watch?v=iHQWL7CV4Sk,
+  "https://www.youtube.com/watch?v=n_sWTHQKr-s",
+  "https://www.youtube.com/watch?v=FdjXC4aDNrc",
   "https://www.youtube.com/watch?v=oqwjsqLvaGA",
   "https://www.youtube.com/watch?v=ewQeG4bfh7o",
   "https://www.youtube.com/watch?v=J1xFJDSeHxI",
